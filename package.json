@@ -1,0 +1,12 @@
+{
+  "name": "ai-pr-review",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^6.0.0",
+    "@octokit/rest": "^20.0.0",
+    "openai": "^4.0.0"
+  }
+}

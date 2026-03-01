@@ -1,0 +1,15 @@
+name: "AI PR Reviewer"
+description: "AI-based PR reviewer for Astro + React + TypeScript projects"
+
+inputs:
+  openai_api_key:
+    description: "OpenAI API Key"
+    required: true
+  mode:
+    description: "Review mode (frontend | fullstack)"
+    required: false
+    default: "frontend"
+
+runs:
+  using: "node20"
+  main: "index.js"
