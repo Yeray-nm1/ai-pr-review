@@ -1,15 +1,28 @@
-name: "AI PR Reviewer"
-description: "AI-based PR reviewer for Astro + React + TypeScript projects"
+name: 'AI PR Reviewer'
+description: 'AI-based PR reviewer for Astro + React + TypeScript projects'
 
 inputs:
   openai_api_key:
-    description: "OpenAI API Key"
+    description: 'OpenAI API Key'
     required: true
   mode:
-    description: "Review mode (frontend | fullstack)"
+    description: 'Review mode (frontend | fullstack)'
     required: false
-    default: "frontend"
+    default: 'frontend'
 
 runs:
-  using: "node20"
-  main: "index.js"
+  using: 'composite'
+  steps:
+    - name: Install action dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm install --omit=dev
+
+    - name: Run AI reviewer
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: node index.js
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        INPUT_OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+        INPUT_MODE: ${{ inputs.mode }}

@@ -6,6 +6,7 @@ Acción de GitHub para revisar pull requests en proyectos con Astro / React / Ty
 - **Analiza** los diffs de archivos frontend (`.ts`, `.tsx`, `.js`, `.jsx`, `.astro`).
 - **Publica comentarios** en la PR vinculados al commit actual (comentarios por línea).
 - **Revisa comentarios previos**: marca threads como resueltos si la IA ya no detecta el problema, o añade un comentario si sigue presente.
+- **Instala dependencias** de la acción en tiempo de ejecución (no requiere `dist/` ni `node_modules` versionado).
 
 **Uso mínimo**
 1. Publica esta acción en un repositorio (por ejemplo `OWNER/REPO`).
