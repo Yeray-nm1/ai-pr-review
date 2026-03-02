@@ -33,12 +33,14 @@ jobs:
         uses: OWNER/REPO@main # reemplaza por tu repo/versión
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: gemini-2.0-flash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 **Inputs**
 - `gemini_api_key` (requerido): clave de Gemini (usualmente desde `secrets.GEMINI_API_KEY`).
+- `gemini_model` (opcional): modelo de Gemini a usar (por defecto `gemini-2.0-flash`).
 - `mode` (opcional): `frontend` (por defecto) o `fullstack`.
 
 **Requisitos de permisos y tokens**

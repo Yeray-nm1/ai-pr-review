@@ -13,6 +13,7 @@ async function run() {
     const token = process.env.GITHUB_TOKEN;
     const geminiKey = core.getInput('gemini_api_key', { required: true });
     const mode = core.getInput('mode') || 'frontend';
+    const geminiModel = core.getInput('gemini_model') || 'gemini-2.0-flash';
 
     const { context } = github;
     const octokit = github.getOctokit(token);
@@ -86,7 +87,7 @@ ${diffContent}
 `;
 
     const response = await gemini.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: geminiModel,
       contents: prompt,
       config: {
         temperature: 0,
@@ -210,7 +211,19 @@ ${diffContent}
       core.info('AI review completed without critical issues.');
     }
   } catch (error) {
-    core.setFailed(error.message);
+    const message = error?.message || String(error);
+    if (
+      message.includes('RESOURCE_EXHAUSTED') ||
+      message.includes('Quota exceeded') ||
+      message.includes('429')
+    ) {
+      core.setFailed(
+        `Gemini quota exceeded. Si estás en free tier y ves limit: 0, ese proyecto/API key no tiene cuota gratuita disponible. Prueba otro proyecto/API key o cambia el modelo con input gemini_model. Error original: ${message}`
+      );
+      return;
+    }
+
+    core.setFailed(message);
   }
 }
 

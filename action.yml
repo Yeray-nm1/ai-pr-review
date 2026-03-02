@@ -5,6 +5,10 @@ inputs:
   gemini_api_key:
     description: 'Gemini API Key'
     required: true
+  gemini_model:
+    description: 'Gemini model name'
+    required: false
+    default: 'gemini-2.0-flash'
   mode:
     description: 'Review mode (frontend | fullstack)'
     required: false
@@ -25,4 +29,5 @@ runs:
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
         INPUT_GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
+        INPUT_GEMINI_MODEL: ${{ inputs.gemini_model }}
         INPUT_MODE: ${{ inputs.mode }}
