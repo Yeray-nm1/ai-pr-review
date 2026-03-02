@@ -2,8 +2,8 @@ name: 'AI PR Reviewer'
 description: 'AI-based PR reviewer for Astro + React + TypeScript projects'
 
 inputs:
-  openai_api_key:
-    description: 'OpenAI API Key'
+  gemini_api_key:
+    description: 'Gemini API Key'
     required: true
   mode:
     description: 'Review mode (frontend | fullstack)'
@@ -24,5 +24,5 @@ runs:
       run: node index.js
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-        INPUT_OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+        INPUT_GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
         INPUT_MODE: ${{ inputs.mode }}

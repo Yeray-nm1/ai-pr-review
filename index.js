@@ -1,6 +1,6 @@
 import core from '@actions/core';
 import github from '@actions/github';
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 
 const FRONTEND_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.astro'];
 
@@ -11,12 +11,12 @@ function isFrontendFile(filename) {
 async function run() {
   try {
     const token = process.env.GITHUB_TOKEN;
-    const openaiKey = core.getInput('openai_api_key', { required: true });
+    const geminiKey = core.getInput('gemini_api_key', { required: true });
     const mode = core.getInput('mode') || 'frontend';
 
     const { context } = github;
     const octokit = github.getOctokit(token);
-    const openai = new OpenAI({ apiKey: openaiKey });
+    const gemini = new GoogleGenAI({ apiKey: geminiKey });
 
     if (!context.payload.pull_request) {
       core.info('Not a pull request. Skipping.');
@@ -85,13 +85,16 @@ Diff:
 ${diffContent}
 `;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      temperature: 0,
-      messages: [{ role: 'user', content: prompt }],
+    const response = await gemini.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+      config: {
+        temperature: 0,
+        responseMimeType: 'application/json',
+      },
     });
 
-    let content = response.choices[0].message.content.trim();
+    let content = (response.text || '').trim();
 
     // Intento defensivo para limpiar markdown si lo devuelve
     if (content.startsWith('```')) {

@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "@google/genai": "^1.14.0",
     "@actions/core": "^1.10.0",
     "@actions/github": "^6.0.0",
-    "@octokit/rest": "^20.0.0",
-    "openai": "^4.0.0"
+    "@octokit/rest": "^20.0.0"
   }
 }

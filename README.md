@@ -1,6 +1,6 @@
 # AI PR Reviewer
 
-Acción de GitHub para revisar pull requests en proyectos con Astro / React / TypeScript usando la API de OpenAI.
+Acción de GitHub para revisar pull requests en proyectos con Astro / React / TypeScript usando la API de Gemini.
 
 **Qué hace**
 - **Analiza** los diffs de archivos frontend (`.ts`, `.tsx`, `.js`, `.jsx`, `.astro`).
@@ -32,18 +32,18 @@ jobs:
       - name: Run AI PR Reviewer
         uses: OWNER/REPO@main # reemplaza por tu repo/versión
         with:
-          openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 **Inputs**
-- `openai_api_key` (requerido): clave de OpenAI (usualmente desde `secrets.OPENAI_API_KEY`).
+- `gemini_api_key` (requerido): clave de Gemini (usualmente desde `secrets.GEMINI_API_KEY`).
 - `mode` (opcional): `frontend` (por defecto) o `fullstack`.
 
 **Requisitos de permisos y tokens**
 - `GITHUB_TOKEN` con permisos por defecto permite publicar comentarios y ejecutar consultas GraphQL para resolver threads. Asegúrate de que el workflow tiene `pull-requests: write` y `contents: read` en `permissions`.
-- Añade `secrets.OPENAI_API_KEY` en cada repo consumidor.
+- Añade `secrets.GEMINI_API_KEY` en cada repo consumidor.
 
 **Comportamiento relevante**
 - La acción crea comentarios con `commit_id` (SHA del head de la PR) para que queden asociados al commit actual.
