@@ -1,6 +1,6 @@
 import core from '@actions/core';
 import github from '@actions/github';
-import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
 
 const FRONTEND_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.astro'];
 
@@ -11,13 +11,16 @@ function isFrontendFile(filename) {
 async function run() {
   try {
     const token = process.env.GITHUB_TOKEN;
-    const geminiKey = core.getInput('gemini_api_key', { required: true });
+    const groqKey = core.getInput('groq_api_key', { required: true });
     const mode = core.getInput('mode') || 'frontend';
-    const geminiModel = core.getInput('gemini_model') || 'gemini-2.0-flash';
+    const groqModel = core.getInput('groq_model') || 'llama-3.1-8b-instant';
 
     const { context } = github;
     const octokit = github.getOctokit(token);
-    const gemini = new GoogleGenAI({ apiKey: geminiKey });
+    const groq = new OpenAI({
+      apiKey: groqKey,
+      baseURL: 'https://api.groq.com/openai/v1',
+    });
 
     if (!context.payload.pull_request) {
       core.info('Not a pull request. Skipping.');
@@ -86,16 +89,14 @@ Diff:
 ${diffContent}
 `;
 
-    const response = await gemini.models.generateContent({
-      model: geminiModel,
-      contents: prompt,
-      config: {
-        temperature: 0,
-        responseMimeType: 'application/json',
-      },
+    const response = await groq.chat.completions.create({
+      model: groqModel,
+      temperature: 0,
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'user', content: prompt }],
     });
 
-    let content = (response.text || '').trim();
+    let content = (response.choices?.[0]?.message?.content || '').trim();
 
     // Intento defensivo para limpiar markdown si lo devuelve
     if (content.startsWith('```')) {
@@ -104,7 +105,12 @@ ${diffContent}
 
     let reviews;
     try {
-      reviews = JSON.parse(content);
+      const parsed = JSON.parse(content);
+      reviews = Array.isArray(parsed) ? parsed : parsed.reviews;
+      if (!Array.isArray(reviews)) {
+        core.warning('Model returned JSON but not an array. Skipping review.');
+        return;
+      }
     } catch (err) {
       core.warning('Model did not return valid JSON. Skipping review.');
       return;
@@ -213,12 +219,13 @@ ${diffContent}
   } catch (error) {
     const message = error?.message || String(error);
     if (
-      message.includes('RESOURCE_EXHAUSTED') ||
       message.includes('Quota exceeded') ||
+      message.includes('rate_limit') ||
+      message.includes('billing') ||
       message.includes('429')
     ) {
       core.setFailed(
-        `Gemini quota exceeded. Si estás en free tier y ves limit: 0, ese proyecto/API key no tiene cuota gratuita disponible. Prueba otro proyecto/API key o cambia el modelo con input gemini_model. Error original: ${message}`
+        `Groq quota/rate limit exceeded. Revisa los límites de tu cuenta o prueba otro modelo con input groq_model. Error original: ${message}`
       );
       return;
     }

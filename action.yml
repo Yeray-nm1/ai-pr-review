@@ -2,13 +2,13 @@ name: 'AI PR Reviewer'
 description: 'AI-based PR reviewer for Astro + React + TypeScript projects'
 
 inputs:
-  gemini_api_key:
-    description: 'Gemini API Key'
+  groq_api_key:
+    description: 'Groq API Key'
     required: true
-  gemini_model:
-    description: 'Gemini model name'
+  groq_model:
+    description: 'Groq model name'
     required: false
-    default: 'gemini-2.0-flash'
+    default: 'llama-3.1-8b-instant'
   mode:
     description: 'Review mode (frontend | fullstack)'
     required: false
@@ -28,6 +28,6 @@ runs:
       run: node index.js
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-        INPUT_GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
-        INPUT_GEMINI_MODEL: ${{ inputs.gemini_model }}
+        INPUT_GROQ_API_KEY: ${{ inputs.groq_api_key }}
+        INPUT_GROQ_MODEL: ${{ inputs.groq_model }}
         INPUT_MODE: ${{ inputs.mode }}

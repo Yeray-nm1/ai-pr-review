@@ -1,6 +1,6 @@
 # AI PR Reviewer
 
-Acción de GitHub para revisar pull requests en proyectos con Astro / React / TypeScript usando la API de Gemini.
+Acción de GitHub para revisar pull requests en proyectos con Astro / React / TypeScript usando la API de Groq.
 
 **Qué hace**
 - **Analiza** los diffs de archivos frontend (`.ts`, `.tsx`, `.js`, `.jsx`, `.astro`).
@@ -32,20 +32,20 @@ jobs:
       - name: Run AI PR Reviewer
         uses: OWNER/REPO@main # reemplaza por tu repo/versión
         with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          gemini_model: gemini-2.0-flash
+          groq_api_key: ${{ secrets.GROQ_API_KEY }}
+          groq_model: llama-3.1-8b-instant
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 **Inputs**
-- `gemini_api_key` (requerido): clave de Gemini (usualmente desde `secrets.GEMINI_API_KEY`).
-- `gemini_model` (opcional): modelo de Gemini a usar (por defecto `gemini-2.0-flash`).
+- `groq_api_key` (requerido): clave de Groq (usualmente desde `secrets.GROQ_API_KEY`).
+- `groq_model` (opcional): modelo de Groq a usar (por defecto `llama-3.1-8b-instant`).
 - `mode` (opcional): `frontend` (por defecto) o `fullstack`.
 
 **Requisitos de permisos y tokens**
 - `GITHUB_TOKEN` con permisos por defecto permite publicar comentarios y ejecutar consultas GraphQL para resolver threads. Asegúrate de que el workflow tiene `pull-requests: write` y `contents: read` en `permissions`.
-- Añade `secrets.GEMINI_API_KEY` en cada repo consumidor.
+- Añade `secrets.GROQ_API_KEY` en cada repo consumidor.
 
 **Comportamiento relevante**
 - La acción crea comentarios con `commit_id` (SHA del head de la PR) para que queden asociados al commit actual.
