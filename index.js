@@ -74,16 +74,18 @@ Review ONLY for:
 
 Do NOT comment on formatting or trivial style.
 
-Return STRICT JSON array:
+Return STRICT JSON object:
 
-[
-  {
-    "file": "relative/path/file.tsx",
-    "line": number,
-    "severity": "low|medium|high",
-    "comment": "clear actionable explanation"
-  }
-]
+{
+  "reviews": [
+    {
+      "file": "relative/path/file.tsx",
+      "line": number,
+      "severity": "low|medium|high",
+      "comment": "clear actionable explanation"
+    }
+  ]
+}
 
 Diff:
 ${diffContent}
@@ -106,7 +108,12 @@ ${diffContent}
     let reviews;
     try {
       const parsed = JSON.parse(content);
-      reviews = Array.isArray(parsed) ? parsed : parsed.reviews;
+      reviews =
+        (Array.isArray(parsed) && parsed) ||
+        parsed.reviews ||
+        parsed.issues ||
+        parsed.comments ||
+        (parsed.file && parsed.line && parsed.comment ? [parsed] : undefined);
       if (!Array.isArray(reviews)) {
         core.warning('Model returned JSON but not an array. Skipping review.');
         return;
