@@ -8,6 +8,28 @@ function isFrontendFile(filename) {
   return FRONTEND_EXTENSIONS.some((ext) => filename.endsWith(ext));
 }
 
+function getSeverityMeta(severity) {
+  const normalized = String(severity || 'low').toLowerCase();
+  if (normalized === 'high') {
+    return { label: 'HIGH', emoji: '🔴' };
+  }
+  if (normalized === 'medium') {
+    return { label: 'MEDIUM', emoji: '🟠' };
+  }
+
+  return { label: 'LOW', emoji: '🟡' };
+}
+
+function formatReviewComment(review) {
+  const { label, emoji } = getSeverityMeta(review?.severity);
+  return `### 🤖 AI Review\n#### ${emoji} ${label}\n\n**Problema detectado**\n${review.comment}\n\n**Cómo arreglarlo**\n- Corrige la causa raíz en este bloque de código.\n- Añade o ajusta una prueba para cubrir este caso.`;
+}
+
+function formatFollowUpComment(url, severity) {
+  const { label, emoji } = getSeverityMeta(severity);
+  return `### 🔁 Seguimiento AI Review\n#### ${emoji} ${label}\n\n**Estado**\nEste problema parece seguir presente en el commit actual.\n\n**Cómo arreglarlo**\n- Revisa el comentario original y aplica la corrección propuesta.\n- Verifica el cambio con tests o validación manual.\n\nReferencia: ${url}`;
+}
+
 async function run() {
   try {
     const token = process.env.GITHUB_TOKEN;
@@ -127,9 +149,12 @@ ${diffContent}
 
     // Preparar claves de revisiones actuales (file:line)
     const currentKeys = new Set();
+    const reviewByKey = new Map();
     for (const r of reviews) {
       if (!r.file || !r.line) continue;
-      currentKeys.add(`${r.file}:${r.line}`);
+      const key = `${r.file}:${r.line}`;
+      currentKeys.add(key);
+      reviewByKey.set(key, r);
     }
 
     // Obtener comentarios previos de la PR
@@ -144,13 +169,18 @@ ${diffContent}
     );
 
     const aiComments = existingComments.filter(
-      (c) => c.body && c.body.startsWith('**AI (')
+      (c) =>
+        c.body &&
+        (c.body.startsWith('**AI (') ||
+          c.body.startsWith('### 🤖 AI Review') ||
+          c.body.startsWith('### 🔁 Seguimiento AI Review'))
     );
 
     // Para cada comentario AI previo: si la issue ya no aparece en las reviews actuales, marcar resuelto; si sigue, dejar aviso
     for (const c of aiComments) {
       const key = `${c.path}:${c.line}`;
       if (currentKeys.has(key)) {
+        const activeReview = reviewByKey.get(key);
         // Sigue presente -> añadir comentario indicando que sigue ocurriendo
         try {
           await octokit.rest.pulls.createReviewComment({
@@ -158,7 +188,7 @@ ${diffContent}
             repo,
             pull_number,
             commit_id: commitId,
-            body: `**AI**: Este problema parece seguir presente en el commit actual. Referencia: ${c.html_url}`,
+            body: formatFollowUpComment(c.html_url, activeReview?.severity),
             path: c.path,
             line: c.line,
             side: 'RIGHT',
@@ -211,7 +241,7 @@ ${diffContent}
         repo,
         pull_number,
         commit_id: commitId,
-        body: `**AI (${review.severity})**: ${review.comment}`,
+        body: formatReviewComment(review),
         path: review.file,
         line: review.line,
         side: 'RIGHT',
