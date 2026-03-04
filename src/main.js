@@ -11,6 +11,7 @@ import {
   commentExists,
   postReviewComment,
   markThreadResolved,
+  resolvePreviousThreads,
 } from './github/reviewComments.js';
 import { buildPrompt } from './ai/promptLoader.js';
 import { parseAIResponse } from './ai/parseReviews.js';
@@ -83,13 +84,15 @@ async function run() {
         hasCritical = true;
       }
 
-      const exists = commentExists(existingComments, review);
+      const exists = commentExists(aiComments, review);
       if (exists) {
         core.info(
           `Skipping duplicate comment for ${review.file}:${review.line}`
         );
         continue;
       }
+
+      await resolvePreviousThreads(octokit, aiComments, review, commitId);
 
       await postReviewComment(
         octokit,

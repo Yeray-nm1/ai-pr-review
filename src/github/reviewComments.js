@@ -68,6 +68,20 @@ async function markThreadResolved(octokit, nodeId) {
   }
 }
 
+async function resolvePreviousThreads(octokit, comments, review, currentCommitId) {
+  const commentsToResolve = comments.filter(
+    (c) =>
+      c.path === review.file &&
+      c.line === review.line &&
+      c.commit_id !== currentCommitId &&
+      c.node_id
+  );
+
+  for (const comment of commentsToResolve) {
+    await markThreadResolved(octokit, comment.node_id);
+  }
+}
+
 export {
   getExistingComments,
   filterAIComments,
@@ -75,4 +89,5 @@ export {
   commentExists,
   postReviewComment,
   markThreadResolved,
+  resolvePreviousThreads,
 };
