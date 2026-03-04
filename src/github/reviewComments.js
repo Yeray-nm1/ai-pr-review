@@ -53,34 +53,6 @@ async function postReviewComment(
   });
 }
 
-async function postFollowUpComment(
-  octokit,
-  owner,
-  repo,
-  pull_number,
-  commitId,
-  comment,
-  review,
-  formatFollowUpComment
-) {
-  try {
-    await octokit.rest.pulls.createReviewComment({
-      owner,
-      repo,
-      pull_number,
-      commit_id: commitId,
-      body: formatFollowUpComment(comment.html_url, review?.severity),
-      path: comment.path,
-      line: comment.line,
-      side: 'RIGHT',
-    });
-  } catch (e) {
-    core.info(
-      `Failed to post "still present" comment for ${comment.path}:${comment.line} - ${e.message}`
-    );
-  }
-}
-
 async function markThreadResolved(octokit, nodeId) {
   if (!nodeId) {
     core.info(`No node_id for comment, cannot mark resolved.`);
@@ -102,6 +74,5 @@ export {
   isAIComment,
   commentExists,
   postReviewComment,
-  postFollowUpComment,
   markThreadResolved,
 };

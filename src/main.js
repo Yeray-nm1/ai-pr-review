@@ -3,14 +3,13 @@ import github from '@actions/github';
 import { getInputs, GROQ_BASE_URL, DEFAULT_STACK } from './config.js';
 import { createGroqClient, requestReview, cleanMarkdownFences } from './ai/groqClient.js';
 import { isValidFile, buildDiffContent } from './utils/fileFilters.js';
-import { formatReviewComment, formatFollowUpComment } from './format/commentFormatter.js';
+import { formatReviewComment } from './format/commentFormatter.js';
 import { getPRFiles, filterRelevantFiles } from './github/prFiles.js';
 import {
   getExistingComments,
   filterAIComments,
   commentExists,
   postReviewComment,
-  postFollowUpComment,
   markThreadResolved,
 } from './github/reviewComments.js';
 import { buildPrompt } from './ai/promptLoader.js';
@@ -72,19 +71,7 @@ async function run() {
 
     for (const c of aiComments) {
       const key = `${c.path}:${c.line}`;
-      if (currentKeys.has(key)) {
-        const activeReview = reviewByKey.get(key);
-        await postFollowUpComment(
-          octokit,
-          owner,
-          repo,
-          pull_number,
-          commitId,
-          c,
-          activeReview,
-          formatFollowUpComment
-        );
-      } else {
+      if (!currentKeys.has(key)) {
         await markThreadResolved(octokit, c.node_id);
       }
     }
