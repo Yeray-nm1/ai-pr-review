@@ -5,6 +5,8 @@ function buildPrompt(mode, stack, diffContent) {
 
 Stack: ${stackDescription}.
 
+IMPORTANT: Review ONLY the NEW code (lines starting with +), NOT the removed code (lines starting with -).
+
 Review ONLY for:
 - Runtime bugs
 - Security issues (XSS, unsafe HTML injection, unsafe eval)
@@ -14,6 +16,8 @@ Review ONLY for:
 - TypeScript type errors
 
 Do NOT comment on formatting or trivial style.
+
+The "line" number in your response must be the line number in the MODIFIED file (the new version).
 
 Return STRICT JSON object:
 
